@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>롯데월드 하루 대작전 · 세 가족 완벽 플랜</title>
+<meta name="theme-color" content="#6E30C7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F3EA; --ink:#23314D; --muted:#8A9078; --line:#EFE7D9;
+    --accent:#FF5B39; --accent-soft:#FFF1EC;
+    --card:#FFFFFF;
+    --green-bg:#EAF6EE; --green-tx:#2F7D4E; --green-bd:#D2E9D9;
+    --amber-bg:#FFF1E0; --amber-tx:#B5561A; --amber-bd:#FADBB8;
+    --gold-bg:#FBF5E6; --gold-bd:#EFE1B6; --gold-kick:#B8860B; --gold-tx:#5C4A17;
+    --display:'Black Han Sans',sans-serif;
+    --body:'Gothic A1','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    --shadow:0 10px 30px rgba(35,49,77,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--body);
+    -webkit-font-smoothing:antialiased; line-height:1.6;
+    padding:0 0 46px;
+  }
+  .wrap{max-width:468px;margin:0 auto;padding:20px 16px 0}
+
+  /* ---- scroll progress ---- */
+  #progress{
+    position:fixed;top:0;left:0;height:3px;width:100%;
+    background:var(--accent);transform:scaleX(0);transform-origin:0 50%;
+    z-index:100;transition:transform .08s linear;
+    box-shadow:0 0 8px rgba(255,91,57,.5);
+  }
+
+  /* ---- kicker / section heads ---- */
+  .kick{
+    font-family:var(--body);font-weight:800;font-size:10.5px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--accent);
+    display:flex;align-items:center;gap:8px;margin-bottom:9px;
+  }
+  .kick::before{content:"";width:16px;height:2px;background:var(--accent);border-radius:2px;display:inline-block}
+  .sec{margin-top:26px}
+  .sec-h{font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink);letter-spacing:-.01em;line-height:1.15}
+  .lead{font-size:13px;color:#5f6b57;line-height:1.62;margin-top:8px}
+  .lead b{font-weight:800;color:var(--ink)}
+
+  /* ---- hero ---- */
+  .hero{
+    position:relative;overflow:hidden;border-radius:22px;padding:26px 22px 22px;
+    color:#fff;background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);
+    box-shadow:0 18px 40px rgba(110,48,199,.28);
+  }
+  .hero::after{ /* soft ambient sheen, very slow */
+    content:"";position:absolute;inset:-40% -30%;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(255,255,255,.28),transparent 70%);
+    transform:translate(-10%,-10%);animation:sheen 11s ease-in-out infinite;
+  }
+  @keyframes sheen{
+    0%{transform:translate(-14%,-8%) scale(1);opacity:.7}
+    50%{transform:translate(16%,10%) scale(1.15);opacity:1}
+    100%{transform:translate(-14%,-8%) scale(1);opacity:.7}
+  }
+  .hero>*{position:relative;z-index:1}
+  .hero .hkick{font-weight:800;font-size:10.5px;letter-spacing:.2em;color:#FFD9C7;text-transform:uppercase}
+  .hero h1{font-family:var(--display);font-weight:400;font-size:41px;line-height:1.04;margin:11px 0 8px;letter-spacing:-.01em}
+  .hero .sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.9)}
+  .persons{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}
+  .person{font-size:12px;font-weight:700;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;padding:5px 12px;border-radius:20px;backdrop-filter:blur(2px)}
+  .hero .meta{display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.22)}
+  .hero .meta div{flex:1}
+  .hero .meta .ml{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.72)}
+  .hero .meta .mv{font-family:var(--display);font-size:17px;margin-top:3px}
+
+  /* ---- info chips ---- */
+  .infos{margin-top:14px;display:flex;flex-direction:column;gap:9px}
+  .info{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;box-shadow:var(--shadow)}
+  .info .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+  .info .it{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--muted)}
+  .info .iv{font-size:13.5px;font-weight:700;color:var(--ink);margin-top:1px}
+
+  /* ---- generic card ---- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+  .card+.card{margin-top:11px}
+
+  /* ---- tags ---- */
+  .taghead{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+  .taghead .th{font-size:11.5px;font-weight:800;color:#fff;background:var(--ink);padding:4px 11px;border-radius:20px}
+  .taghead.warn .th{background:var(--accent)}
+  .taghead .sub{font-size:11.5px;color:var(--muted);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:7px}
+  .tag{font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:9px;border:1px solid}
+  .tag.g{background:var(--green-bg);color:var(--green-tx);border-color:var(--green-bd)}
+  .tag.a{background:var(--amber-bg);color:var(--amber-tx);border-color:var(--amber-bd)}
+
+  /* ---- note (gold) ---- */
+  .note{background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:13px;padding:13px 14px;margin-top:12px}
+  .note .nk{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--gold-kick);margin-bottom:4px}
+  .note .nt{font-size:12.5px;line-height:1.55;color:var(--gold-tx)}
+  .note .nt b{font-weight:800}
+
+  /* ---- sticker slots ---- */
+  .slots{display:flex;gap:14px;justify-content:center;margin-top:2px}
+  .slot{
+    width:84px;height:84px;border-radius:50%;border:4px solid #fff;
+    position:relative;cursor:pointer;overflow:hidden;flex:none;
+    background:#FFF4EF center/cover no-repeat;
+    box-shadow:0 0 0 1.5px #F0D9CE,0 8px 16px rgba(35,49,77,.14);
+    animation:floaty 4.4s ease-in-out infinite;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .slot:nth-child(2){background-color:#FFFBEF;box-shadow:0 0 0 1.5px #EFE1B6,0 8px 16px rgba(35,49,77,.14);animation-duration:4.9s;animation-delay:.35s}
+  .slot:nth-child(3){background-color:#EFF7FF;box-shadow:0 0 0 1.5px #CFE4F5,0 8px 16px rgba(35,49,77,.14);animation-duration:4.6s;animation-delay:.7s}
+  .slot .ph{display:flex;flex-direction:column;align-items:center;gap:1px;color:#C7A091;pointer-events:none}
+  .slot .ph .plus{font-size:20px;font-weight:800;line-height:1}
+  .slot .ph .pt{font-size:10px;font-weight:700}
+  .slot.filled .ph{display:none}
+  .slot:active{transform:scale(.94)}
+  .slot input{display:none}
+
+  /* ---- floor plan ---- */
+  .floor{display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid #F1EADD;position:relative}
+  .floor:last-child{border-bottom:0}
+  .floor .lv{width:38px;height:38px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:14px;color:#fff;background:var(--ink)}
+  .floor.hot .lv{background:var(--accent)}
+  .floor.dim{opacity:.5}
+  .floor.dim .lv{background:#B7B0A2}
+  .floor .fx{flex:1}
+  .floor .fn{font-size:9.5px;font-weight:800;letter-spacing:.05em;color:var(--muted);margin-bottom:2px}
+  .floor .fd{font-size:13px;font-weight:600;color:var(--ink);line-height:1.4}
+  .floor .fd b{font-weight:800;color:var(--accent)}
+  .floor .start{position:absolute;top:8px;right:0;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--accent);background:var(--accent-soft);border:1px solid #FADBCF;padding:2px 7px;border-radius:6px}
+
+  /* ---- timeline ---- */
+  .tl{position:relative;margin-top:6px;padding-left:2px}
+  .tl-line{position:absolute;left:47px;top:14px;bottom:22px;width:2px;background:linear-gradient(#FFC7B8,#F0D9CE);transform:scaleY(0);transform-origin:top center;transition:transform 1.1s cubic-bezier(.4,0,.2,1)}
+  .tl.drawn .tl-line{transform:scaleY(1)}
+  .tl-item{display:grid;grid-template-columns:44px 18px 1fr;gap:9px;padding:9px 0}
+  .tl-time{font-family:var(--display);font-size:13px;color:var(--accent);text-align:right;padding-top:2px;line-height:1.2;letter-spacing:-.02em}
+  .tl-mid{display:flex;justify-content:center;padding-top:5px}
+  .tl-dot{width:11px;height:11px;border-radius:50%;background:#fff;border:3px solid var(--accent);z-index:1}
+  .tl-item.hi .tl-dot{background:var(--accent)}
+  .tl-body .tb-h{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .tl-body .tb-t{font-size:14px;font-weight:800;color:var(--ink)}
+  .tl-body .tb-flag{font-size:10px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:6px;letter-spacing:.02em}
+  .tl-body p{font-size:12.5px;color:#5f6b57;line-height:1.6;margin-top:4px}
+  .tl-body p b{font-weight:800;color:var(--ink)}
+  .tl-body .mini{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .tl-body .mini span{font-size:11px;font-weight:700;background:#F4EFE4;color:#6a6152;border:1px solid #E9E1D1;padding:3px 8px;border-radius:7px}
+
+  /* ---- checklist ---- */
+  .ckwrap .ckhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .ckhead .ct{font-family:var(--display);font-size:16px;color:var(--ink)}
+  .ckcount{font-family:var(--display);font-size:13px;color:var(--accent);background:var(--accent-soft);padding:3px 11px;border-radius:8px}
+  .ckitem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #F1EADD;padding:12px 2px;cursor:pointer;font-family:inherit}
+  .ckitem:last-child{border-bottom:0}
+  .ckbox{width:23px;height:23px;flex:none;border-radius:7px;border:2px solid #D8CFBE;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .18s ease}
+  .ckbox svg{width:14px;height:14px}
+  .ckbox path{fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .25s ease .04s}
+  .cklabel{font-size:14px;font-weight:700;color:var(--ink);flex:1;transition:color .18s}
+  .ckmust{font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.04em;flex:none}
+  .ckitem.done .ckbox{background:var(--accent);border-color:var(--accent)}
+  .ckitem.done .ckbox path{stroke-dashoffset:0}
+  .ckitem.done .cklabel{color:#A69C8A;text-decoration:line-through}
+  .ckitem.done .ckmust{color:#C9BFA8}
+
+  /* ---- good to know ---- */
+  .gtk{display:flex;flex-direction:column;gap:10px}
+  .gtk .g{display:flex;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 14px;box-shadow:var(--shadow)}
+  .gtk .gn{font-family:var(--display);font-size:14px;color:var(--accent);flex:none;line-height:1.3}
+  .gtk .gx{font-size:12.5px;color:#5f6b57;line-height:1.6}
+  .gtk .gx b{font-weight:800;color:var(--ink)}
+
+  /* ---- footer ---- */
+  .foot{margin-top:30px;text-align:center;padding:26px 20px;border-radius:20px;background:linear-gradient(158deg,#F15A9C,#8B37CE 60%,#6E30C7);color:#fff;box-shadow:0 14px 34px rgba(110,48,199,.24)}
+  .foot .ft{font-family:var(--display);font-size:20px;line-height:1.25}
+  .foot .fk{font-size:10px;font-weight:800;letter-spacing:.16em;color:rgba(255,255,255,.75);margin-top:12px}
+
+  /* ---- motion: scroll reveal ---- */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.6,.2,1),transform .7s cubic-bezier(.2,.6,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+  /* desktop-only hover lift */
+  @media (hover:hover) and (pointer:fine){
+    .info,.card,.gtk .g{transition:transform .2s ease,box-shadow .2s ease}
+    .info:hover,.card:hover,.gtk .g:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(35,49,77,.12)}
+  }
+
+  /* respect reduced motion */
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .reveal{opacity:1!important;transform:none!important;transition:none!important}
+    .tl-line{transform:scaleY(1)!important;transition:none!important}
+    .slot,.hero::after{animation:none!important}
+    *{transition-duration:.001ms!important}
+  }
+</style>
+<noscript><style>.reveal{opacity:1!important;transform:none!important}.tl-line{transform:scaleY(1)!important}</style></noscript>
+</head>
+<body>
+<div id="progress"></div>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero reveal">
+    <div class="hkick">FAMILY ONE-DAY GUIDE · No.01</div>
+    <h1>롯데월드<br>하루 대작전</h1>
+    <div class="sub">20년 만의 롯데월드 · 세 가족 완벽 플랜</div>
+    <div class="persons">
+      <span class="person">아빠</span>
+      <span class="person">엄마</span>
+      <span class="person">우리 딸 · 100cm</span>
+    </div>
+    <div class="meta">
+      <div><div class="ml">DATE</div><div class="mv">7.2 (목)</div></div>
+      <div><div class="ml">OPEN</div><div class="mv">10:00</div></div>
+      <div><div class="ml">CLOSE</div><div class="mv">21:00</div></div>
+    </div>
+  </header>
+
+  <!-- INFO CHIPS -->
+  <div class="infos reveal">
+    <div class="info"><span class="dot"></span><div><div class="it">티켓</div><div class="iv">종합이용권 1일권</div></div></div>
+    <div class="info"><span class="dot"></span><div><div class="it">따님 요금</div><div class="iv">어린이 (2022년생)</div></div></div>
+    <div class="info"><span class="dot"></span><div><div class="it">내일 날씨</div><div class="iv">구름 많고 무더움 · 오후 소나기 가능 → 실내 위주</div></div></div>
+  </div>
+
+  <!-- WHAT SHE CAN RIDE -->
+  <section class="sec reveal">
+    <div class="kick">What she can ride</div>
+    <div class="sec-h">오늘 우리 딸이 탈 수 있는 것</div>
+    <p class="lead">100cm + 부모님이 옆에 같이 타면 유아·패밀리 기구는 거의 다 OK. <b>혼자만 타는 건 110cm부터</b>, 지금은 '동반 탑승'이 기본이에요.</p>
+    <div class="card" style="margin-top:13px">
+      <div class="taghead"><span class="th">부모님과 함께 타면 OK</span></div>
+      <div class="tags">
+        <span class="tag g">회전목마</span><span class="tag g">월드모노레일</span><span class="tag g">로티트레인</span>
+        <span class="tag g">포켓몬 풍선비행</span><span class="tag g">언더씨킹덤</span><span class="tag g">유레카</span>
+        <span class="tag g">스윙팡팡</span><span class="tag g">햇님달님</span><span class="tag g">점핑피쉬</span>
+        <span class="tag g">드림보트</span><span class="tag g">쁘띠빵빵</span><span class="tag g">환타지드림</span><span class="tag g">키즈토리아</span>
+      </div>
+      <div class="taghead warn" style="margin-top:16px"><span class="th">부모 동반 필수</span><span class="sub">혼자는 110cm부터</span></div>
+      <div class="tags">
+        <span class="tag a">신밧드의 모험</span><span class="tag a">회전바구니</span><span class="tag a">어린이 범퍼카</span>
+      </div>
+      <div class="note">
+        <div class="nk">NOTE · 꼭 확인</div>
+        <div class="nt">신밧드·회전바구니는 '100cm 자유탑승'이 아니라 <b>110cm부터 혼자</b> / 100cm는 <b>보호자 동반 시</b> 탑승. 따님은 <b>엄마·아빠랑 같이 타면 OK</b> (회전목마는 100cm라 혼자도 가능). 입장하면 <b>키 측정 밴드</b>부터 받고 각 기구 입구 안내를 확인하세요.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STICKER -->
+  <section class="sec reveal">
+    <div class="card">
+      <div style="font-size:15px;font-weight:800;color:var(--ink)">우리 딸 포켓몬 친구들</div>
+      <div style="font-size:12.5px;font-weight:500;color:var(--muted);margin:2px 0 15px">사진을 탭해서 좋아하는 순간을 붙여보세요</div>
+      <div class="slots">
+        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"></label>
+        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"></label>
+        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOOR PLAN -->
+  <section class="sec reveal">
+    <div class="kick">Floor plan</div>
+    <div class="sec-h">실내 층별 동선</div>
+    <p class="lead">실내는 <b>4층~지하1층</b>. 오전에 위→아래로 층 이동을 몰아서 끝내고, 오후엔 <b>1층에만</b> 머무는 게 핵심. 층 이동은 유모차째 엘리베이터로!</p>
+    <div class="card" style="margin-top:13px">
+      <div class="floor hot"><div class="lv">4F</div><div class="fx"><div class="fn">여기부터 시작</div><div class="fd">포켓몬 풍선비행 — <b>탑승예약제</b>(당일 방식 달라짐, 앱 확인). 오픈 직후 방문!</div></div><span class="start">START</span></div>
+      <div class="floor"><div class="lv">3F</div><div class="fx"><div class="fn">내려오는 길</div><div class="fd">월드모노레일 — 공중 한 바퀴 + 쉬어가기</div></div></div>
+      <div class="floor dim"><div class="lv">2F</div><div class="fx"><div class="fn">스릴 기구 존</div><div class="fd">후렌치레볼루션 등 — 오늘은 패스</div></div></div>
+      <div class="floor hot"><div class="lv">1F</div><div class="fx"><div class="fn">오후 내내 여기</div><div class="fd">회전목마 · 로티트레인 · 신밧드 · 회전바구니 · 키디존 · 키즈토리아</div></div></div>
+      <div class="floor"><div class="lv">B1</div><div class="fx"><div class="fn">엘리베이터로</div><div class="fd">드림보트 — 키 제한 없는 패밀리 후룸</div></div></div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="sec reveal">
+    <div class="kick">Timeline</div>
+    <div class="sec-h">하루 동선 (10시 오픈 기준)</div>
+    <div class="tl" id="tl">
+      <div class="tl-line"></div>
+
+      <div class="tl-item reveal"><div class="tl-time">08:30</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">고양 출발</span></div>
+        <p>올림픽대로로 50~70분. 9:40 도착 목표. 자차 주차(롯데몰 공용)가 유모차·짐엔 편해요.</p></div></div>
+
+      <div class="tl-item reveal"><div class="tl-time">10:00</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">입장 → 키 측정부터</span></div>
+        <p>오픈런이 핵심. 사람 없을 때 인기 실내 기구를 먼저 쓸어담아요.</p></div></div>
+
+      <div class="tl-item reveal"><div class="tl-time">10:00<br>~11:30</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">실내 클래식</span><span class="tb-flag">위→아래로</span></div>
+        <p><b>4층 풍선비행 → 3층 모노레일 → 1층 → 지하 드림보트</b> 순서. 오전에 층 이동을 다 끝내는 게 포인트! 풍선비행은 <b>탑승예약제</b>라 오픈 직후 앱으로 방식 확인. (모노레일·신밧드·회전바구니는 부모 동반)</p>
+        <div class="mini"><span>4F 풍선비행</span><span>3F 모노레일</span><span>1F 회전목마·신밧드·회전바구니</span><span>B1 드림보트</span></div></div></div>
+
+      <div class="tl-item reveal"><div class="tl-time">11:30<br>~12:30</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">이른 점심</span></div>
+        <p>정오 러시 전에! 아이는 배고프면 예민해져요. 조금 일찍 먹여두면 오후가 편해요.</p></div></div>
+
+      <div class="tl-item reveal"><div class="tl-time">13:00</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">키즈토리아</span><span class="tb-flag">앱 예약</span></div>
+        <p>매 정각 입장·45분 이용 실내 키즈존. 아이는 뛰고 부모는 앉아 쉬는 꿀타임.</p></div></div>
+
+      <div class="tl-item reveal hi"><div class="tl-time">14:00</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">퍼레이드!</span><span class="tb-flag">오늘의 하이라이트</span></div>
+        <p>매일 오후 2시, 1층 퍼레이드 코스. 로티·로리와 캐릭터들이 지나가요. <b>15분 전 앞자리 사수!</b></p></div></div>
+
+      <div class="tl-item reveal"><div class="tl-time">14:30<br>~16:00</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">키디존</span><span class="tb-flag">1F · 이동 없음</span></div>
+        <p>좋아하는 건 몇 번이고 반복 탑승! 어린이 범퍼카·회전바구니는 부모님이 같이 타면 돼요. 직접 운전하는 범퍼카는 무조건 인기예요.</p>
+        <div class="mini"><span>햇님달님</span><span>어린이 범퍼카 (동반)</span><span>점핑피쉬</span><span>유레카</span><span>스윙팡팡</span><span>회전바구니 (동반)</span></div></div></div>
+
+      <div class="tl-item reveal"><div class="tl-time">16:00<br>~17:30</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">매직아일랜드</span><span class="tb-flag">날씨 OK일 때</span></div>
+        <p>석촌호수 위 야외 구역. 늦은 오후 햇살에 사진도 예뻐요. <b>비 오면</b> 종합권에 포함된 민속박물관으로 피신(시원 + 아이가 의외로 좋아함).</p>
+        <div class="mini"><span>쁘띠빵빵</span><span>환타지드림</span></div></div></div>
+
+      <div class="tl-item reveal"><div class="tl-time">17:30<br>~19:00</div><div class="tl-mid"><div class="tl-dot"></div></div><div class="tl-body">
+        <div class="tb-h"><span class="tb-t">저녁 + 앙코르, 그리고 하산</span></div>
+        <p>이 나이엔 이쯤이 자연스러운 마무리. 여유롭게 저녁 먹고 좋아했던 기구 한두 개 더 태운 뒤, <b>아이 무너지기 전에</b> 나오는 게 정답. 21시까지 무리해서 채우지 마세요.</p></div></div>
+
+    </div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section class="sec reveal">
+    <div class="kick">Checklist</div>
+    <div class="card ckwrap">
+      <div class="ckhead"><span class="ct">준비물 (탭하면 체크!)</span><span class="ckcount" id="ckcount">0 / 0</span></div>
+      <div id="cklist"></div>
+    </div>
+  </section>
+
+  <!-- GOOD TO KNOW -->
+  <section class="sec reveal">
+    <div class="kick">Good to know</div>
+    <div class="sec-h">알아두면 좋은 것</div>
+    <div class="gtk" style="margin-top:13px">
+      <div class="g"><span class="gn">01</span><span class="gx"><b>한낮 1~4시가 가장 붐벼요.</b> 이 플랜은 그 시간에 점심·퍼레이드·키즈토리아처럼 '앉아서 하는 것'을 배치해 자연스럽게 줄을 피하도록 짰어요.</span></div>
+      <div class="g"><span class="gn">02</span><span class="gx">부모님이 스릴 기구(아트란티스·자이로드롭 등) 타고 싶으면 <b>한 명씩 교대로</b> 아이 보면서 다녀오세요.</span></div>
+      <div class="g"><span class="gn">03</span><span class="gx">온라인 예매만 해도 <b>기본 33% 할인.</b> 통신사(SKT·KT·LGU+)나 놀이공원 제휴카드가 있으면 본인 40~55%까지. 제일 큰 할인 하나만 골라 적용!</span></div>
+      <div class="g"><span class="gn">04</span><span class="gx">아침에 앱에서 <b>오늘 공연 시간·테마</b>를 한 번 더 확인하세요(현재 여름 삼바 축제 + 포켓몬 축제 진행 중, 날씨·현장 사정으로 변동될 수 있음).</span></div>
+      <div class="g"><span class="gn">05</span><span class="gx"><b>유모차는 직접 가져가세요.</b> 파크 대여 유모차는 36개월 미만만 이용 가능해서, 따님(만 3세 이상)은 대여가 안 돼요.</span></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot reveal">
+    <div class="ft">세 가족, 내일 정말<br>즐거운 하루 되세요!</div>
+    <div class="fk">FAMILY ONE-DAY GUIDE · 2026.07.02</div>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- checklist (vanilla, was DCLogic in v2) ---------- */
+  var CHECK = [
+    { label:'유모차 (직접 지참)', must:true },
+    { label:'온라인 티켓 예매 (전날 밤)', must:true },
+    { label:'롯데월드 앱 설치 (대기·매직패스·키즈토리아 예약)', must:false },
+    { label:'나이 증빙 (등본·가족관계증명서 캡처)', must:true },
+    { label:'물 · 휴대용 선풍기 · 선크림', must:false },
+    { label:'접이식 우산 / 우비 (소나기 대비)', must:false },
+    { label:'아이 여벌 옷 한 벌', must:false }
+  ];
+  var CHECKMARK = '<svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>';
+  var list = document.getElementById('cklist');
+  var countEl = document.getElementById('ckcount');
+  function refreshCount(){
+    var done = list.querySelectorAll('.ckitem.done').length;
+    countEl.textContent = done + ' / ' + CHECK.length;
+  }
+  CHECK.forEach(function(item){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ckitem';
+    b.innerHTML = '<span class="ckbox">'+CHECKMARK+'</span>' +
+                  '<span class="cklabel">'+item.label+'</span>' +
+                  (item.must ? '<span class="ckmust">필수</span>' : '');
+    b.addEventListener('click', function(){
+      b.classList.toggle('done');
+      refreshCount();
+    });
+    list.appendChild(b);
+  });
+  refreshCount();
+
+  /* ---------- sticker slots (vanilla, was <image-slot> in v2) ---------- */
+  document.querySelectorAll('.slot input').forEach(function(inp){
+    inp.addEventListener('change', function(){
+      var f = inp.files && inp.files[0];
+      if(!f) return;
+      var url = URL.createObjectURL(f);
+      var slot = inp.closest('.slot');
+      slot.style.backgroundImage = 'url('+url+')';
+      slot.classList.add('filled');
+    });
+  });
+
+  /* ---------- scroll progress ---------- */
+  var prog = document.getElementById('progress');
+  function onScroll(){
+    var d = document.documentElement;
+    var max = d.scrollHeight - d.clientHeight;
+    var p = max > 0 ? (d.scrollTop || document.body.scrollTop) / max : 0;
+    prog.style.transform = 'scaleX(' + p + ')';
+  }
+  window.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+
+  /* ---------- scroll reveal + timeline draw ---------- */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function(el){ el.classList.add('in'); });
+    var tl0 = document.getElementById('tl'); if (tl0) tl0.classList.add('drawn');
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold:0.12, rootMargin:'0px 0px -7% 0px' });
+    reveals.forEach(function(el){ io.observe(el); });
+
+    var tlEl = document.getElementById('tl');
+    if (tlEl){
+      var tlio = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting){ tlEl.classList.add('drawn'); tlio.unobserve(tlEl); }
+        });
+      }, { threshold:0.15 });
+      tlio.observe(tlEl);
+    }
+  }
+})();
+</script>
+</body>
+</html>
