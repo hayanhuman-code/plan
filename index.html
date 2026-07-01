@@ -128,6 +128,13 @@
   .slot.filled .ph{display:none}
   .slot:active{transform:scale(.94)}
   .slot input{display:none}
+  .slot .del{
+    position:absolute;top:2px;right:2px;width:22px;height:22px;border:0;border-radius:50%;
+    background:rgba(35,49,77,.72);color:#fff;font-size:15px;line-height:22px;font-weight:800;
+    cursor:pointer;display:none;align-items:center;justify-content:center;padding:0;z-index:2;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  .slot.filled .del{display:flex}
 
   /* ---- floor plan ---- */
   .floor{display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid #F1EADD;position:relative}
@@ -181,6 +188,19 @@
   .gtk .gn{font-family:var(--display);font-size:14px;color:var(--accent);flex:none;line-height:1.3}
   .gtk .gx{font-size:12.5px;color:#5f6b57;line-height:1.6}
   .gtk .gx b{font-weight:800;color:var(--ink)}
+
+  /* ---- diary link button ---- */
+  .diarylink{
+    display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;
+    text-decoration:none;padding:14px 18px;border-radius:14px;
+    font-family:var(--display);font-size:16px;color:#fff;letter-spacing:.01em;
+    background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);
+    box-shadow:0 10px 26px rgba(110,48,199,.26);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .diarylink:active{transform:scale(.98)}
+  .diarylink .di{font-size:18px}
+  .diarylink .dv small{display:block;font-family:var(--body);font-weight:700;font-size:11px;color:rgba(255,255,255,.85);letter-spacing:0;margin-top:2px}
 
   /* ---- footer ---- */
   .foot{margin-top:30px;text-align:center;padding:26px 20px;border-radius:20px;background:linear-gradient(158deg,#F15A9C,#8B37CE 60%,#6E30C7);color:#fff;box-shadow:0 14px 34px rgba(110,48,199,.24)}
@@ -243,6 +263,9 @@
     <div class="nt"><b>공식 롯데월드 앱</b>에서 오늘의 <b>공연·퍼레이드·포켓몬 포토타임 시간</b>을 최종 확인하세요. 여름 시즌 콘텐츠(리우 삼바 퍼레이드·포켓몬 포토타임·K호러 축제 등)는 수시로 바뀝니다. <b>오후 소나기 확률</b>과 실시간 레이더도 함께 확인!</div>
   </div>
 
+  <!-- DIARY LINK -->
+  <a class="diarylink reveal" href="diary.html"><span class="di">📖</span><span class="dv">하루 일기 쓰러 가기<small>실제 시간·장소·사진으로 오늘을 기록해요</small></span></a>
+
   <!-- WHAT SHE CAN RIDE -->
   <section class="sec reveal">
     <div class="kick">What she can ride</div>
@@ -277,9 +300,9 @@
       <div style="font-size:15px;font-weight:800;color:var(--ink)">우리 딸 포켓몬 친구들</div>
       <div style="font-size:12.5px;font-weight:500;color:var(--muted);margin:2px 0 15px">사진을 탭해서 좋아하는 순간을 붙여보세요</div>
       <div class="slots">
-        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"></label>
-        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"></label>
-        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"></label>
+        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"><button class="del" type="button" aria-label="사진 삭제">×</button></label>
+        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"><button class="del" type="button" aria-label="사진 삭제">×</button></label>
+        <label class="slot"><span class="ph"><span class="plus">＋</span><span class="pt">붙이기</span></span><input type="file" accept="image/*"><button class="del" type="button" aria-label="사진 삭제">×</button></label>
       </div>
     </div>
   </section>
@@ -465,10 +488,27 @@
     slot.style.backgroundImage = 'url('+dataUrl+')';
     slot.classList.add('filled');
   }
+  function clearSlot(slot){
+    slot.style.backgroundImage = '';
+    slot.classList.remove('filled');
+    var inp = slot.querySelector('input');
+    if (inp) inp.value = '';
+  }
   /* restore saved photos */
   slots.forEach(function(slot, i){
     var saved = lsGet(PHOTO_KEY + i);
     if (saved) fillSlot(slot, saved);
+  });
+  /* delete button per slot (don't trigger the file picker) */
+  document.querySelectorAll('.slot .del').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var slot = btn.closest('.slot');
+      var idx = Array.prototype.indexOf.call(slots, slot);
+      clearSlot(slot);
+      if (idx > -1){ try{ window.localStorage.removeItem(PHOTO_KEY + idx); }catch(err){} }
+    });
   });
   /* downscale to keep localStorage small, then persist */
   function shrink(file, cb){

@@ -1,6 +1,6 @@
 /* 롯데월드 플랜 · offline service worker (stale-while-revalidate) */
-var CACHE = 'lw-plan-v1';
-var ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
+var CACHE = 'lw-plan-v2';
+var ASSETS = ['./', './index.html', './diary.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(e){
   e.waitUntil(
