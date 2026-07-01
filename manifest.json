@@ -1,0 +1,15 @@
+{
+  "name": "롯데월드 하루 대작전 · 세 가족 플랜",
+  "short_name": "롯데월드 플랜",
+  "description": "세 가족의 롯데월드 하루 방문 플랜 · 동선·준비물·안전",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F3EA",
+  "theme_color": "#6E30C7",
+  "icons": [
+    { "src": "icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" }
+  ]
+}
