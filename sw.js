@@ -1,5 +1,7 @@
-/* 롯데월드 플랜 · offline service worker (stale-while-revalidate) */
-var CACHE = 'lw-plan-v2';
+/* 롯데월드 플랜 · service worker
+   - HTML(페이지 이동): network-first → 온라인이면 항상 최신, 오프라인이면 캐시
+   - 그 외 정적 자원: cache-first(백그라운드 갱신) */
+var CACHE = 'lw-plan-v3';
 var ASSETS = ['./', './index.html', './diary.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(e){
@@ -16,14 +18,38 @@ self.addEventListener('activate', function(e){
   );
 });
 
+function isHTML(req){
+  return req.mode === 'navigate' ||
+         (req.headers.get('accept') || '').indexOf('text/html') !== -1;
+}
+
 self.addEventListener('fetch', function(e){
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(function(cached){
-      var net = fetch(e.request).then(function(res){
+  var req = e.request;
+  if (req.method !== 'GET') return;
+
+  /* 페이지(HTML)는 네트워크 우선 → 배포 즉시 최신 반영 */
+  if (isHTML(req)) {
+    e.respondWith(
+      fetch(req).then(function(res){
         if (res && res.status === 200 && res.type === 'basic') {
           var copy = res.clone();
-          caches.open(CACHE).then(function(c){ c.put(e.request, copy); });
+          caches.open(CACHE).then(function(c){ c.put(req, copy); });
+        }
+        return res;
+      }).catch(function(){
+        return caches.match(req).then(function(c){ return c || caches.match('./index.html'); });
+      })
+    );
+    return;
+  }
+
+  /* 정적 자원은 캐시 우선 + 백그라운드 갱신 */
+  e.respondWith(
+    caches.match(req).then(function(cached){
+      var net = fetch(req).then(function(res){
+        if (res && res.status === 200 && res.type === 'basic') {
+          var copy = res.clone();
+          caches.open(CACHE).then(function(c){ c.put(req, copy); });
         }
         return res;
       }).catch(function(){ return cached; });
