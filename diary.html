@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>롯데월드 하루 일기 · 우리 가족 기록</title>
+<meta name="theme-color" content="#6E30C7">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="롯데월드 일기">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F3EA; --ink:#23314D; --muted:#8A9078; --line:#EFE7D9;
+    --accent:#FF5B39; --accent-soft:#FFF1EC;
+    --card:#FFFFFF;
+    --gold-bg:#FBF5E6; --gold-bd:#EFE1B6; --gold-kick:#B8860B; --gold-tx:#5C4A17;
+    --display:'Black Han Sans',sans-serif;
+    --body:'Gothic A1','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    --shadow:0 10px 30px rgba(35,49,77,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;line-height:1.6;padding:0 0 46px}
+  .wrap{max-width:468px;margin:0 auto;padding:20px 16px 0}
+
+  .kick{font-family:var(--body);font-weight:800;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .kick::before{content:"";width:16px;height:2px;background:var(--accent);border-radius:2px;display:inline-block}
+  .sec{margin-top:26px}
+  .sec-h{font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink);letter-spacing:-.01em;line-height:1.15}
+  .lead{font-size:13px;color:#5f6b57;line-height:1.62;margin-top:8px}
+  .lead b{font-weight:800;color:var(--ink)}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;border-radius:22px;padding:26px 22px 22px;color:#fff;background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);box-shadow:0 18px 40px rgba(110,48,199,.28)}
+  .hero::after{content:"";position:absolute;inset:-40% -30%;pointer-events:none;background:radial-gradient(closest-side,rgba(255,255,255,.28),transparent 70%);transform:translate(-10%,-10%);animation:sheen 11s ease-in-out infinite}
+  @keyframes sheen{0%{transform:translate(-14%,-8%) scale(1);opacity:.7}50%{transform:translate(16%,10%) scale(1.15);opacity:1}100%{transform:translate(-14%,-8%) scale(1);opacity:.7}}
+  .hero>*{position:relative;z-index:1}
+  .hero .hkick{font-weight:800;font-size:10.5px;letter-spacing:.2em;color:#FFD9C7;text-transform:uppercase}
+  .hero h1{font-family:var(--display);font-weight:400;font-size:37px;line-height:1.04;margin:11px 0 8px;letter-spacing:-.01em}
+  .hero .sub{font-size:13px;font-weight:500;color:rgba(255,255,255,.9)}
+  .back{display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:12px;font-weight:700;color:#fff;text-decoration:none;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:7px 13px;border-radius:20px}
+
+  /* card */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+
+  /* form */
+  .field{margin-top:13px}
+  .field:first-child{margin-top:0}
+  .flabel{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;display:block}
+  .inp,select.inp{width:100%;font-family:var(--body);font-size:14px;font-weight:700;color:var(--ink);background:#FBF8F1;border:1px solid var(--line);border-radius:11px;padding:11px 12px;-webkit-appearance:none;appearance:none}
+  select.inp{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%238A9078' stroke-width='2' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 13px center;padding-right:32px}
+  .inp:focus,select.inp:focus{outline:none;border-color:var(--accent);background:#fff}
+  .photopick{display:flex;align-items:center;gap:12px}
+  .photobtn{flex:none;display:inline-flex;align-items:center;gap:7px;font-family:var(--body);font-size:13px;font-weight:800;color:var(--accent);background:var(--accent-soft);border:1px solid #FADBCF;border-radius:11px;padding:11px 14px;cursor:pointer}
+  .photobtn input{display:none}
+  .prevwrap{position:relative;width:60px;height:60px;flex:none;border-radius:12px;overflow:hidden;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--line);background:#FFF4EF center/cover no-repeat;display:none}
+  .prevwrap.on{display:block}
+  .prevwrap .del{position:absolute;top:1px;right:1px;width:20px;height:20px;border:0;border-radius:50%;background:rgba(35,49,77,.72);color:#fff;font-size:14px;line-height:20px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  .addbtn{width:100%;margin-top:16px;font-family:var(--display);font-size:16px;color:#fff;border:0;border-radius:13px;padding:14px;cursor:pointer;background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);box-shadow:0 10px 24px rgba(110,48,199,.24)}
+  .addbtn:active{transform:scale(.99)}
+
+  /* entries */
+  .count{font-family:var(--display);font-size:13px;color:var(--accent);background:var(--accent-soft);padding:3px 11px;border-radius:8px}
+  .ehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+  .empty{text-align:center;color:var(--muted);font-size:13px;font-weight:600;padding:34px 10px;background:var(--card);border:1px dashed var(--line);border-radius:16px;margin-top:13px}
+  .entry{display:flex;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px;box-shadow:var(--shadow);margin-top:11px;position:relative}
+  .entry .ephoto{width:92px;height:92px;flex:none;border-radius:12px;background:#FFF4EF center/cover no-repeat;border:1px solid var(--line)}
+  .entry .ebody{flex:1;min-width:0;padding-right:24px}
+  .entry .etime{font-family:var(--display);font-size:17px;color:var(--accent);letter-spacing:-.01em}
+  .entry .eplace{font-size:14px;font-weight:800;color:var(--ink);margin-top:3px;word-break:break-word}
+  .entry .edel{position:absolute;top:10px;right:10px;width:24px;height:24px;border:0;border-radius:50%;background:#F4EFE4;color:#9a917f;font-size:15px;line-height:24px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  .entry .edel:active{transform:scale(.92)}
+
+  .note{background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:13px;padding:13px 14px;margin-top:16px}
+  .note .nk{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--gold-kick);margin-bottom:4px}
+  .note .nt{font-size:12px;line-height:1.55;color:var(--gold-tx)}
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.6,.2,1),transform .7s cubic-bezier(.2,.6,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media (hover:hover) and (pointer:fine){.card,.entry{transition:transform .2s ease,box-shadow .2s ease}.entry:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(35,49,77,.12)}}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1!important;transform:none!important;transition:none!important}.hero::after{animation:none!important}*{transition-duration:.001ms!important}}
+</style>
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero reveal">
+    <div class="hkick">FAMILY DIARY · 우리 가족만의 기록</div>
+    <h1>롯데월드<br>하루 일기</h1>
+    <div class="sub">계획은 계획일 뿐! 실제로 움직인 시간·장소·사진을 남겨요.</div>
+    <a class="back" href="index.html">← 하루 플랜으로</a>
+  </header>
+
+  <!-- ADD FORM -->
+  <section class="sec reveal">
+    <div class="kick">New record</div>
+    <div class="sec-h">지금 이 순간 기록하기</div>
+    <div class="card" style="margin-top:13px">
+      <div class="field">
+        <label class="flabel" for="f-time">시간</label>
+        <input class="inp" type="time" id="f-time">
+      </div>
+      <div class="field">
+        <label class="flabel" for="f-place">장소 · 어트랙션</label>
+        <select class="inp" id="f-place"></select>
+      </div>
+      <div class="field" id="f-custom-wrap" style="display:none">
+        <label class="flabel" for="f-custom">직접 입력</label>
+        <input class="inp" type="text" id="f-custom" placeholder="예: 아이스크림 먹은 벤치" maxlength="40">
+      </div>
+      <div class="field">
+        <label class="flabel">사진 (1장)</label>
+        <div class="photopick">
+          <label class="photobtn">＋ 사진 선택<input type="file" accept="image/*" id="f-photo"></label>
+          <div class="prevwrap" id="f-prev"><button class="del" type="button" id="f-prev-del" aria-label="사진 제거">×</button></div>
+        </div>
+      </div>
+      <button class="addbtn" type="button" id="f-add">＋ 일기에 추가</button>
+    </div>
+  </section>
+
+  <!-- ENTRIES -->
+  <section class="sec reveal">
+    <div class="ehead">
+      <div class="kick" style="margin-bottom:0">Our day</div>
+      <span class="count" id="e-count">0개</span>
+    </div>
+    <div class="sec-h" style="margin-top:9px">오늘의 기록</div>
+    <div id="e-list"></div>
+    <div class="note">
+      <div class="nk">저장 안내</div>
+      <div class="nt">기록은 이 <b>기기(브라우저)</b>에 저장돼요. 새로고침해도 유지되지만, 다른 폰에서는 보이지 않아요. 소중한 사진은 별도로도 백업해두세요.</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+
+  var DIARY_KEY = 'lw_diary';
+
+  /* place options drawn from the plan */
+  var PLACES = ['포켓몬 풍선비행','월드모노레일','회전목마','로티트레인','신밧드의 모험','회전바구니',
+    '드림보트','키즈토리아','키디존','어린이 범퍼카','햇님달님','점핑피쉬','유레카','스윙팡팡',
+    '퍼레이드','매직아일랜드','쁘띠빵빵','환타지드림','민속박물관','점심 식사','저녁 식사',
+    '메이플 아일랜드','만남의 광장','휴식 · 낮잠'];
+
+  var timeEl = document.getElementById('f-time');
+  var placeEl = document.getElementById('f-place');
+  var customWrap = document.getElementById('f-custom-wrap');
+  var customEl = document.getElementById('f-custom');
+  var photoEl = document.getElementById('f-photo');
+  var prev = document.getElementById('f-prev');
+  var prevDel = document.getElementById('f-prev-del');
+  var addBtn = document.getElementById('f-add');
+  var listEl = document.getElementById('e-list');
+  var countEl = document.getElementById('e-count');
+
+  /* build select */
+  PLACES.forEach(function(p){
+    var o = document.createElement('option'); o.value = p; o.textContent = p; placeEl.appendChild(o);
+  });
+  var oc = document.createElement('option'); oc.value = '__custom__'; oc.textContent = '직접 입력…'; placeEl.appendChild(oc);
+  placeEl.addEventListener('change', function(){
+    var custom = placeEl.value === '__custom__';
+    customWrap.style.display = custom ? '' : 'none';
+    if (custom) customEl.focus();
+  });
+
+  /* default time = now */
+  try{
+    var d = new Date();
+    timeEl.value = ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+  }catch(e){}
+
+  /* photo pick + downscale */
+  var pendingPhoto = null;
+  function shrink(file, cb){
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function(){
+      var max = 800, w = img.width, h = img.height;
+      if (w > h && w > max){ h = Math.round(h*max/w); w = max; }
+      else if (h >= w && h > max){ w = Math.round(w*max/h); h = max; }
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      try{ cb(c.toDataURL('image/jpeg', 0.82)); }catch(e){ cb(null); }
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); cb(null); };
+    img.src = url;
+  }
+  photoEl.addEventListener('change', function(){
+    var f = photoEl.files && photoEl.files[0];
+    if(!f) return;
+    shrink(f, function(dataUrl){
+      if(!dataUrl) return;
+      pendingPhoto = dataUrl;
+      prev.style.backgroundImage = 'url('+dataUrl+')';
+      prev.classList.add('on');
+    });
+  });
+  function clearPending(){
+    pendingPhoto = null;
+    prev.style.backgroundImage = '';
+    prev.classList.remove('on');
+    photoEl.value = '';
+  }
+  prevDel.addEventListener('click', clearPending);
+
+  /* storage */
+  function load(){ try{ return JSON.parse(lsGet(DIARY_KEY)) || []; }catch(e){ return []; } }
+  function save(arr){
+    if(!lsSet(DIARY_KEY, JSON.stringify(arr))){
+      alert('저장 공간이 가득 찼어요. 오래된 기록을 지우거나 사진 수를 줄여주세요.');
+      return false;
+    }
+    return true;
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+
+  function render(){
+    var arr = load().slice().sort(function(a,b){ return (a.time||'').localeCompare(b.time||''); });
+    countEl.textContent = arr.length + '개';
+    listEl.innerHTML = '';
+    if(!arr.length){
+      var e = document.createElement('div'); e.className = 'empty';
+      e.textContent = '아직 기록이 없어요. 위에서 첫 순간을 남겨보세요! ✨';
+      listEl.appendChild(e); return;
+    }
+    arr.forEach(function(it){
+      var card = document.createElement('div'); card.className = 'entry';
+      var photo = it.photo ? '<div class="ephoto" style="background-image:url('+it.photo+')"></div>' : '';
+      card.innerHTML = photo +
+        '<div class="ebody"><div class="etime">'+esc(it.time||'--:--')+'</div>'+
+        '<div class="eplace">'+esc(it.place||'')+'</div></div>'+
+        '<button class="edel" type="button" data-id="'+it.id+'" aria-label="기록 삭제">×</button>';
+      listEl.appendChild(card);
+    });
+    listEl.querySelectorAll('.edel').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(!confirm('이 기록을 삭제할까요?')) return;
+        var id = btn.getAttribute('data-id');
+        save(load().filter(function(x){ return String(x.id) !== String(id); }));
+        render();
+      });
+    });
+  }
+
+  function nextId(arr){
+    var m = 0; arr.forEach(function(x){ var n = parseInt(x.id,10)||0; if(n>m) m=n; }); return m+1;
+  }
+
+  addBtn.addEventListener('click', function(){
+    var place = placeEl.value === '__custom__' ? (customEl.value || '').trim() : placeEl.value;
+    if(!place){ alert('장소를 선택하거나 입력해주세요.'); return; }
+    var arr = load();
+    arr.push({ id: nextId(arr), time: timeEl.value || '', place: place, photo: pendingPhoto || '' });
+    if(!save(arr)) return;
+    clearPending();
+    if(placeEl.value === '__custom__'){ customEl.value=''; }
+    render();
+    window.scrollTo({ top: document.getElementById('e-list').offsetTop - 40, behavior:'smooth' });
+  });
+
+  render();
+
+  /* reveal */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold:0.1, rootMargin:'0px 0px -6% 0px' });
+    reveals.forEach(function(el){ io.observe(el); });
+  }
+
+  /* PWA */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+})();
+</script>
+</body>
+</html>
