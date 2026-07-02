@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>우리 가족 사진첩 · 롯데월드</title>
+<meta name="theme-color" content="#6E30C7">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="롯데월드 사진첩">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;800;900&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F3EA; --ink:#23314D; --muted:#8A9078; --line:#EFE7D9;
+    --accent:#FF5B39; --accent-soft:#FFF1EC; --card:#FFFFFF;
+    --gold-bg:#FBF5E6; --gold-bd:#EFE1B6; --gold-kick:#B8860B; --gold-tx:#5C4A17;
+    --display:'Black Han Sans',sans-serif;
+    --body:'Gothic A1','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    --hand:'Nanum Pen Script','Gothic A1',cursive;
+    --shadow:0 10px 30px rgba(35,49,77,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;line-height:1.6;padding:0 0 46px}
+  .wrap{max-width:520px;margin:0 auto;padding:20px 16px 0}
+
+  /* top links */
+  .toplinks{display:flex;gap:8px;margin-bottom:14px}
+  .toplinks a{font-size:12px;font-weight:700;color:var(--ink);text-decoration:none;background:#fff;border:1px solid var(--line);padding:7px 12px;border-radius:20px;box-shadow:var(--shadow)}
+
+  /* title */
+  .titlebar{text-align:center;padding:6px 6px 4px}
+  .tkick{font-family:var(--body);font-weight:800;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  .talbum{font-family:var(--hand);font-size:46px;line-height:1.05;color:var(--ink);margin-top:6px;outline:none}
+  .tsub{font-family:var(--hand);font-size:23px;line-height:1.1;color:#6a6152;margin-top:2px;outline:none}
+  [contenteditable]:empty:before{content:attr(data-ph);color:#C9C0AE}
+  [contenteditable]:focus{background:#FFFBF2;box-shadow:inset 0 -2px 0 #F0D9CE;border-radius:4px}
+  .trule{width:54px;height:3px;background:var(--accent);border-radius:3px;margin:12px auto 0}
+
+  /* toolbar */
+  .toolbar{display:flex;gap:9px;margin:18px 2px 4px}
+  .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--body);font-size:14px;font-weight:800;border-radius:12px;padding:13px;cursor:pointer;border:0}
+  .btn.add{color:#fff;background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);box-shadow:0 10px 24px rgba(110,48,199,.24)}
+  .btn.print{color:var(--ink);background:var(--accent-soft);border:2px solid var(--accent)}
+  .btn:active{transform:scale(.99)}
+  .btn input{display:none}
+  .hint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5}
+  .hint b{color:var(--ink);font-weight:800}
+
+  /* album grid of polaroids */
+  .album{margin-top:20px;display:grid;grid-template-columns:repeat(2,1fr);gap:20px 16px}
+  .polaroid{background:#fff;padding:9px 9px 0;border-radius:3px;box-shadow:0 9px 22px rgba(35,49,77,.16);transform:rotate(var(--t,0deg));position:relative;break-inside:avoid;page-break-inside:avoid}
+  .polaroid .pimg{width:100%;aspect-ratio:1/1;background:#F1EADD center/cover no-repeat;border-radius:2px}
+  .polaroid .pcap{font-family:var(--hand);font-size:20px;line-height:1.2;color:#4a4436;text-align:center;padding:9px 4px 13px;min-height:42px;outline:none;word-break:break-word}
+  .polaroid .pcap:empty:before{content:'여기 캡션 ✎';color:#CDC4B2}
+  .polaroid .pcap:focus{background:#FFFBF2;border-radius:4px}
+  .pctrl{position:absolute;top:-9px;right:-9px;display:flex;gap:4px}
+  .pctrl button{width:26px;height:26px;border:0;border-radius:50%;background:#fff;color:var(--ink);font-size:14px;font-weight:800;line-height:26px;cursor:pointer;box-shadow:0 3px 8px rgba(35,49,77,.22);padding:0}
+  .pctrl button.del{background:var(--accent);color:#fff}
+  .pctrl button:active{transform:scale(.9)}
+  .pmove{position:absolute;bottom:44px;left:-9px;display:flex;flex-direction:column;gap:4px}
+  .pmove button{width:26px;height:26px;border:0;border-radius:50%;background:#fff;color:var(--ink);font-size:13px;font-weight:800;line-height:26px;cursor:pointer;box-shadow:0 3px 8px rgba(35,49,77,.22);padding:0}
+
+  .empty{grid-column:1 / -1;text-align:center;color:var(--muted);font-size:14px;font-weight:600;padding:40px 12px;background:#fff;border:1px dashed var(--line);border-radius:16px}
+  .empty .big{font-family:var(--hand);font-size:26px;color:var(--ink);display:block;margin-bottom:4px}
+
+  .note{background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:13px;padding:13px 14px;margin-top:20px}
+  .note .nk{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--gold-kick);margin-bottom:4px}
+  .note .nt{font-size:12px;line-height:1.55;color:var(--gold-tx)}
+  .note .nt b{font-weight:800}
+
+  @media (hover:hover) and (pointer:fine){
+    .polaroid{transition:transform .2s ease,box-shadow .2s ease}
+    .polaroid:hover{transform:rotate(0deg) scale(1.02);box-shadow:0 16px 30px rgba(35,49,77,.2);z-index:2}
+  }
+
+  /* ---------- PRINT (A4) ---------- */
+  @media print{
+    @page{ size:A4; margin:12mm; }
+    html,body{ background:#F7F3EA !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .no-print{ display:none !important; }
+    .wrap{ max-width:none; margin:0; padding:0; }
+    .titlebar{ padding-top:0; margin-bottom:6mm; }
+    .talbum{ font-size:40px; }
+    .album{ margin-top:6mm; gap:9mm 8mm; }
+    .polaroid{ box-shadow:0 2px 4px rgba(0,0,0,.12); }
+    .polaroid:hover{ transform:rotate(var(--t,0deg)); }
+    .pctrl,.pmove{ display:none !important; }
+    [contenteditable]:focus{ background:none; box-shadow:none; }
+    .polaroid .pcap:empty:before{ content:''; }
+  }
+</style>
+<noscript><style>.toolbar{display:none}</style></noscript>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="toplinks no-print">
+    <a href="index.html">← 하루 플랜</a>
+    <a href="diary.html">📖 하루 일기</a>
+  </div>
+
+  <!-- TITLE -->
+  <div class="titlebar">
+    <div class="tkick">FAMILY PHOTO ALBUM</div>
+    <div class="talbum" id="a-title" contenteditable="true" spellcheck="false" data-ph="앨범 제목"></div>
+    <div class="tsub" id="a-sub" contenteditable="true" spellcheck="false" data-ph="날짜 · 한 줄 소개"></div>
+    <div class="trule"></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar no-print">
+    <label class="btn add">＋ 사진 추가<input type="file" accept="image/*" multiple id="a-file"></label>
+    <button class="btn print" type="button" id="a-print">🖨 인쇄 · PDF 저장</button>
+  </div>
+  <div class="hint no-print">여러 장 한 번에 고를 수 있어요 · 사진/제목/캡션을 탭해서 편집 · 인쇄 창에서 <b>‘배경 그래픽’</b>을 켜면 색이 예쁘게 나와요</div>
+
+  <!-- ALBUM -->
+  <div class="album" id="a-album"></div>
+
+  <div class="note no-print">
+    <div class="nk">저장 안내</div>
+    <div class="nt">사진과 글은 이 <b>기기(브라우저)</b>에 저장돼요(새로고침해도 유지). 다른 폰에는 안 보이니, 완성되면 <b>🖨 인쇄·PDF 저장</b>으로 남겨두세요. 저장 공간이 넉넉하도록 사진은 자동으로 알맞게 줄여 담아요.</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+  function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+
+  var KEY = 'lw_album';
+  var titleEl = document.getElementById('a-title');
+  var subEl   = document.getElementById('a-sub');
+  var albumEl = document.getElementById('a-album');
+  var fileEl  = document.getElementById('a-file');
+  var printBtn= document.getElementById('a-print');
+
+  var state = { title:'', sub:'', photos:[] };
+  try{
+    var saved = JSON.parse(lsGet(KEY));
+    if (saved && typeof saved === 'object'){ state = { title:saved.title||'', sub:saved.sub||'', photos:Array.isArray(saved.photos)?saved.photos:[] }; }
+  }catch(e){}
+  if (!state.title && !state.photos.length){ state.title = '우리 가족 롯데월드'; state.sub = '2026.07.02 · 스무 해 만의 하루'; }
+
+  function save(){
+    if(!lsSet(KEY, JSON.stringify(state))){
+      alert('저장 공간이 가득 찼어요. 사진 몇 장을 지우거나, 지금 인쇄·PDF로 저장해두세요.');
+      return false;
+    }
+    return true;
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
+
+  /* fields */
+  titleEl.textContent = state.title;
+  subEl.textContent = state.sub;
+  titleEl.addEventListener('input', function(){ state.title = titleEl.textContent.trim(); save(); });
+  subEl.addEventListener('input', function(){ state.sub = subEl.textContent.trim(); save(); });
+
+  /* downscale */
+  function shrink(file, cb){
+    var img = new Image(); var url = URL.createObjectURL(file);
+    img.onload = function(){
+      var max = 1000, w = img.width, h = img.height;
+      if (w > h && w > max){ h = Math.round(h*max/w); w = max; }
+      else if (h >= w && h > max){ w = Math.round(w*max/h); h = max; }
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      try{ cb(c.toDataURL('image/jpeg', 0.82)); }catch(e){ cb(null); }
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); cb(null); };
+    img.src = url;
+  }
+  function tilt(){ return (Math.round((Math.random()*5 - 2.5)*10)/10) + 'deg'; }
+  var seq = 0;
+  function nid(){ var m = 0; state.photos.forEach(function(p){ var n=parseInt(p.id,10)||0; if(n>m)m=n; }); return Math.max(m, seq++) + 1; }
+
+  fileEl.addEventListener('change', function(){
+    var files = Array.prototype.slice.call(fileEl.files || []);
+    if(!files.length) return;
+    var pending = files.length;
+    files.forEach(function(f){
+      shrink(f, function(dataUrl){
+        if (dataUrl){ state.photos.push({ id:nid(), src:dataUrl, cap:'', t:tilt() }); }
+        if (--pending === 0){ save(); render(); }
+      });
+    });
+    fileEl.value = '';
+  });
+
+  function move(id, dir){
+    var i = state.photos.findIndex(function(p){ return String(p.id)===String(id); });
+    var j = i + dir;
+    if (i<0 || j<0 || j>=state.photos.length) return;
+    var tmp = state.photos[i]; state.photos[i] = state.photos[j]; state.photos[j] = tmp;
+    save(); render();
+  }
+  function del(id){
+    if(!confirm('이 사진을 앨범에서 뺄까요?')) return;
+    state.photos = state.photos.filter(function(p){ return String(p.id)!==String(id); });
+    save(); render();
+  }
+
+  function render(){
+    albumEl.innerHTML = '';
+    if(!state.photos.length){
+      var e = document.createElement('div'); e.className = 'empty no-print';
+      e.innerHTML = '<span class="big">아직 사진이 없어요</span>위 <b>＋ 사진 추가</b>로 우리 가족 사진을 담아보세요 ✨';
+      albumEl.appendChild(e); return;
+    }
+    state.photos.forEach(function(p){
+      var fig = document.createElement('figure');
+      fig.className = 'polaroid';
+      fig.style.setProperty('--t', p.t || '0deg');
+      fig.innerHTML =
+        '<div class="pimg" style="background-image:url('+p.src+')"></div>' +
+        '<div class="pcap" contenteditable="true" spellcheck="false" data-id="'+p.id+'">'+esc(p.cap||'')+'</div>' +
+        '<div class="pmove no-print"><button type="button" data-mv="up" title="앞으로">‹</button><button type="button" data-mv="down" title="뒤로">›</button></div>' +
+        '<div class="pctrl no-print"><button type="button" class="del" title="빼기">×</button></div>';
+      var cap = fig.querySelector('.pcap');
+      cap.addEventListener('input', function(){
+        var t = cap.textContent;
+        var it = state.photos.find(function(x){ return String(x.id)===String(p.id); });
+        if (it){ it.cap = t; save(); }
+      });
+      fig.querySelector('.del').addEventListener('click', function(){ del(p.id); });
+      fig.querySelector('[data-mv="up"]').addEventListener('click', function(){ move(p.id,-1); });
+      fig.querySelector('[data-mv="down"]').addEventListener('click', function(){ move(p.id, 1); });
+      albumEl.appendChild(fig);
+    });
+  }
+  render();
+
+  printBtn.addEventListener('click', function(){
+    if(!state.photos.length){ alert('사진을 먼저 담아주세요!'); return; }
+    window.print();
+  });
+
+  /* PWA */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+})();
+</script>
+</body>
+</html>
