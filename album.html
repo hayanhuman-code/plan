@@ -168,7 +168,7 @@
 
   <div class="note no-print">
     <div class="nk">저장 안내</div>
-    <div class="nt">사진과 글은 이 <b>기기(브라우저)</b>에 저장돼요(새로고침해도 유지). 다른 폰에는 안 보이니, 완성되면 <b>🖨 인쇄·PDF 저장</b>으로 남겨두세요. 저장 공간이 넉넉하도록 사진은 자동으로 알맞게 줄여 담아요.</div>
+    <div class="nt">사진과 글은 이 <b>기기(브라우저)</b>에 저장돼요(새로고침해도 유지). 사진은 <b>기기 저장소(IndexedDB)</b>에 담겨 <b>많이 넣어도 넉넉</b>합니다. 다른 폰에는 안 보이니, 완성되면 <b>🖨 인쇄·PDF 저장</b>으로 꼭 남겨두세요.</div>
   </div>
 
 </div>
@@ -179,7 +179,10 @@
   function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
 
-  var KEY = 'lw_album';
+  var MKEY = 'lw_album';            /* 메타(제목·캡션·순서) — 작음, localStorage */
+  var DBNAME = 'lw_album_db', STORE = 'photos';
+  var DB = null, hasIDB = false;    /* 사진 원본(dataURL) — 큼, IndexedDB */
+
   var titleEl = document.getElementById('a-title');
   var subEl   = document.getElementById('a-sub');
   var albumEl = document.getElementById('a-album');
@@ -187,24 +190,30 @@
   var printBtn= document.getElementById('a-print');
 
   var state = { title:'', sub:'', photos:[] };
-  try{
-    var saved = JSON.parse(lsGet(KEY));
-    if (saved && typeof saved === 'object'){ state = { title:saved.title||'', sub:saved.sub||'', photos:Array.isArray(saved.photos)?saved.photos:[] }; }
-  }catch(e){}
-  if (!state.title && !state.photos.length){ state.title = '우리 가족 롯데월드'; state.sub = '2026.07.02 · 스무 해 만의 하루'; }
 
+  /* --- IndexedDB helpers: 사진 원본 저장(용량 넉넉, 수백 MB급) --- */
+  function idbPut(rec){ return new Promise(function(res,rej){ try{ var t=DB.transaction(STORE,'readwrite'); t.objectStore(STORE).put(rec); t.oncomplete=function(){res();}; t.onerror=function(){rej(t.error);}; t.onabort=function(){rej(t.error);}; }catch(e){ rej(e); } }); }
+  function idbDel(id){ return new Promise(function(res){ try{ var t=DB.transaction(STORE,'readwrite'); t.objectStore(STORE)['delete'](id); t.oncomplete=function(){res();}; t.onerror=function(){res();}; }catch(e){ res(); } }); }
+  function idbAll(){ return new Promise(function(res){ try{ var t=DB.transaction(STORE,'readonly'); var rq=t.objectStore(STORE).getAll(); rq.onsuccess=function(){res(rq.result||[]);}; rq.onerror=function(){res([]);}; }catch(e){ res([]); } }); }
+
+  function maxId(){ var m=0; state.photos.forEach(function(p){ var n=parseInt(p.id,10)||0; if(n>m)m=n; }); return m; }
+
+  /* 메타만 저장 (사진 원본 제외) → localStorage에 항상 여유 */
   function save(){
-    if(!lsSet(KEY, JSON.stringify(state))){
-      alert('저장 공간이 가득 찼어요. 사진 몇 장을 지우거나, 지금 인쇄·PDF로 저장해두세요.');
+    var items = state.photos.map(function(p){
+      return hasIDB ? { id:p.id, cap:p.cap||'', t:p.t||'0deg' }
+                    : { id:p.id, cap:p.cap||'', t:p.t||'0deg', src:p.src };
+    });
+    if(!lsSet(MKEY, JSON.stringify({ title:state.title, sub:state.sub, items:items }))){
+      alert(hasIDB ? '제목·캡션 저장에 실패했어요. 브라우저 저장 공간을 확인해주세요.'
+                   : '저장 공간이 가득 찼어요. 사진 몇 장을 지우거나, 지금 인쇄·PDF로 저장해두세요.');
       return false;
     }
     return true;
   }
   function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
 
-  /* fields */
-  titleEl.textContent = state.title;
-  subEl.textContent = state.sub;
+  /* fields (내용은 로드 후 채움) */
   titleEl.addEventListener('input', function(){ state.title = titleEl.textContent.trim(); save(); });
   subEl.addEventListener('input', function(){ state.sub = subEl.textContent.trim(); save(); });
 
@@ -224,8 +233,6 @@
     img.src = url;
   }
   function tilt(){ return (Math.round((Math.random()*5 - 2.5)*10)/10) + 'deg'; }
-  var seq = 0;
-  function nid(){ var m = 0; state.photos.forEach(function(p){ var n=parseInt(p.id,10)||0; if(n>m)m=n; }); return Math.max(m, seq++) + 1; }
 
   fileEl.addEventListener('change', function(){
     var files = Array.prototype.slice.call(fileEl.files || []);
@@ -236,16 +243,28 @@
     files.forEach(function(f, idx){
       shrink(f, function(dataUrl){
         results[idx] = dataUrl;
-        if (--pending === 0){
-          results.forEach(function(du){
-            if (du){ state.photos.push({ id:nid(), src:du, cap:'', t:tilt() }); }
-          });
-          save(); render();
-        }
+        if (--pending === 0){ commitAdds(results); }
       });
     });
     fileEl.value = '';
   });
+  function commitAdds(arr){
+    var base = maxId() + 1, k = 0, toAdd = [];
+    arr.forEach(function(du){ if(du){ toAdd.push({ id: base + (k++), src:du, cap:'', t:tilt() }); } });
+    if(!toAdd.length) return;
+    if (hasIDB){
+      Promise.all(toAdd.map(function(p){ return idbPut({ id:p.id, src:p.src }); })).then(function(){
+        toAdd.forEach(function(p){ state.photos.push(p); });
+        save(); render();
+      }, function(){
+        alert('사진 저장에 실패했어요. 저장 공간이 부족할 수 있어요. 사진 수를 줄이거나 잠시 후 다시 시도해주세요.');
+      });
+    } else {
+      toAdd.forEach(function(p){ state.photos.push(p); });
+      if(!save()){ toAdd.forEach(function(p){ var i=state.photos.indexOf(p); if(i>-1) state.photos.splice(i,1); }); render(); return; }
+      render();
+    }
+  }
 
   function move(id, dir){
     var i = state.photos.findIndex(function(p){ return String(p.id)===String(id); });
@@ -256,8 +275,8 @@
   }
   function del(id){
     if(!confirm('이 사진을 앨범에서 뺄까요?')) return;
-    state.photos = state.photos.filter(function(p){ return String(p.id)!==String(id); });
-    save(); render();
+    function done(){ state.photos = state.photos.filter(function(p){ return String(p.id)!==String(id); }); save(); render(); }
+    if (hasIDB){ idbDel(id).then(done, done); } else { done(); }
   }
 
   /* ---------- 캡션 추천(귀찮은 캡션 도우미) ---------- */
@@ -325,7 +344,56 @@
       albumEl.appendChild(sheet);
     });
   }
-  render();
+
+  /* ---------- 로드 & 저장소 초기화 (IndexedDB + 마이그레이션) ---------- */
+  function finishLoad(){
+    if(!state.title && !state.photos.length){ state.title='우리 가족 롯데월드'; state.sub='2026.07.02 · 스무 해 만의 하루'; }
+    titleEl.textContent = state.title;
+    subEl.textContent = state.sub;
+    render();
+  }
+  function loadInline(raw){
+    if(!raw){ return; }
+    state.title=raw.title||''; state.sub=raw.sub||'';
+    var arr = raw.items || raw.photos || [];
+    state.photos = arr.map(function(p){ return {id:p.id, src:p.src||'', cap:p.cap||'', t:p.t||'0deg'}; }).filter(function(p){ return p.src; });
+  }
+  function boot(){
+    var raw=null; try{ raw=JSON.parse(lsGet(MKEY)); }catch(e){}
+    function withDB(){
+      /* 예전 방식(localStorage에 사진 통째로) → IndexedDB로 이전 후 메타만 남김 */
+      if (raw && raw.photos && !raw.items){
+        Promise.all((raw.photos||[]).map(function(p){ return idbPut({id:p.id, src:p.src}); })).then(function(){
+          state.title=raw.title||''; state.sub=raw.sub||'';
+          state.photos=(raw.photos||[]).map(function(p){ return {id:p.id, src:p.src, cap:p.cap||'', t:p.t||'0deg'}; });
+          save();   /* 작은 메타가 큰 blob을 덮어써 localStorage 공간이 비워짐 */
+          finishLoad();
+        }, function(){ hasIDB=false; loadInline(raw); finishLoad(); });
+        return;
+      }
+      /* 새 방식: 메타(순서·캡션) + IndexedDB(사진 원본) 결합 */
+      idbAll().then(function(recs){
+        var map={}; recs.forEach(function(r){ map[r.id]=r.src; });
+        var items = (raw && raw.items) ? raw.items : [];
+        state.title = raw ? (raw.title||'') : '';
+        state.sub   = raw ? (raw.sub||'')   : '';
+        state.photos = items.map(function(it){ return {id:it.id, src:map[it.id]||'', cap:it.cap||'', t:it.t||'0deg'}; }).filter(function(p){ return p.src; });
+        finishLoad();
+      });
+    }
+    if ('indexedDB' in window){
+      var rq;
+      try{ rq = indexedDB.open(DBNAME, 1); }
+      catch(e){ hasIDB=false; loadInline(raw); finishLoad(); return; }
+      rq.onupgradeneeded=function(){ var db=rq.result; if(!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE,{keyPath:'id'}); };
+      rq.onsuccess=function(){ DB=rq.result; hasIDB=true; withDB(); };
+      rq.onerror=function(){ hasIDB=false; loadInline(raw); finishLoad(); };
+      rq.onblocked=function(){ hasIDB=false; loadInline(raw); finishLoad(); };
+    } else {
+      hasIDB=false; loadInline(raw); finishLoad();
+    }
+  }
+  boot();
 
   /* 빈 캡션 한 번에 채우기 (직접 쓴 캡션은 유지) */
   var sugBtn = document.getElementById('a-suggest');
