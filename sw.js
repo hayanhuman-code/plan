@@ -1,8 +1,8 @@
 /* 롯데월드 플랜 · service worker
    - HTML(페이지 이동): network-first → 온라인이면 항상 최신, 오프라인이면 캐시
    - 그 외 정적 자원: cache-first(백그라운드 갱신) */
-var CACHE = 'lw-plan-v3';
-var ASSETS = ['./', './index.html', './diary.html', './manifest.json', './icon.svg'];
+var CACHE = 'lw-plan-v4';
+var ASSETS = ['./', './index.html', './diary.html', './manifest.json', './icon.svg', './html2canvas.min.js'];
 
 self.addEventListener('install', function(e){
   e.waitUntil(

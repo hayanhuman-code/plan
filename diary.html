@@ -65,6 +65,16 @@
   .addbtn{width:100%;margin-top:16px;font-family:var(--display);font-size:16px;color:#fff;border:0;border-radius:13px;padding:14px;cursor:pointer;background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);box-shadow:0 10px 24px rgba(110,48,199,.24)}
   .addbtn:active{transform:scale(.99)}
 
+  /* capture-to-album button */
+  .capbtn{width:100%;margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--display);font-size:16px;color:var(--ink);border:2px solid var(--accent);border-radius:13px;padding:13px;cursor:pointer;background:var(--accent-soft)}
+  .capbtn:active{transform:scale(.99)}
+  .capbtn:disabled{opacity:.6;cursor:default}
+  /* elements hidden while capturing the keepsake image */
+  body.capturing .no-cap,
+  body.capturing .entry .edel,
+  body.capturing .back{display:none!important}
+  body.capturing .entry .ebody{padding-right:0}
+
   /* entries */
   .count{font-family:var(--display);font-size:13px;color:var(--accent);background:var(--accent-soft);padding:3px 11px;border-radius:8px}
   .ehead{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
@@ -100,7 +110,7 @@
   </header>
 
   <!-- ADD FORM -->
-  <section class="sec reveal">
+  <section class="sec reveal no-cap">
     <div class="kick">New record</div>
     <div class="sec-h">지금 이 순간 기록하기</div>
     <div class="card" style="margin-top:13px">
@@ -135,14 +145,16 @@
     </div>
     <div class="sec-h" style="margin-top:9px">오늘의 기록</div>
     <div id="e-list"></div>
-    <div class="note">
+    <button class="capbtn no-cap" type="button" id="e-capture">📸 전체 캡처해서 앨범에 저장</button>
+    <div class="note no-cap">
       <div class="nk">저장 안내</div>
-      <div class="nt">기록은 이 <b>기기(브라우저)</b>에 저장돼요. 새로고침해도 유지되지만, 다른 폰에서는 보이지 않아요. 소중한 사진은 별도로도 백업해두세요.</div>
+      <div class="nt">기록은 이 <b>기기(브라우저)</b>에 저장돼요. 새로고침해도 유지되지만, 다른 폰에서는 보이지 않아요. <b>📸 버튼</b>으로 전체를 한 장의 이미지로 만들어 사진 앨범에 저장해두면 안전해요.</div>
     </div>
   </section>
 
 </div>
 
+<script src="html2canvas.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -276,6 +288,56 @@
   });
 
   render();
+
+  /* ---------- capture full page to image → save to album ---------- */
+  var capBtn = document.getElementById('e-capture');
+  function downloadBlob(blob){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = '롯데월드_하루일기.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  }
+  function saveCanvas(canvas){
+    if(!canvas.toBlob){ downloadBlob(dataURLtoBlob(canvas.toDataURL('image/png'))); return; }
+    canvas.toBlob(function(blob){
+      if(!blob){ alert('캡처에 실패했어요. 다시 시도해주세요.'); return; }
+      var file = null;
+      try{ file = new File([blob], '롯데월드_하루일기.png', { type:'image/png' }); }catch(e){}
+      if (file && navigator.canShare && navigator.canShare({ files:[file] }) && navigator.share){
+        /* iOS/모바일: 공유 시트 → "이미지 저장"으로 사진 앨범에 저장 */
+        navigator.share({ files:[file], title:'롯데월드 하루 일기' }).catch(function(){ downloadBlob(blob); });
+      } else {
+        downloadBlob(blob);
+      }
+    }, 'image/png');
+  }
+  function dataURLtoBlob(d){
+    var parts = d.split(','), bstr = atob(parts[1]), n = bstr.length, u8 = new Uint8Array(n);
+    while(n--){ u8[n] = bstr.charCodeAt(n); }
+    return new Blob([u8], { type:'image/png' });
+  }
+  if (capBtn){
+    capBtn.addEventListener('click', function(){
+      if (typeof html2canvas !== 'function'){ alert('캡처 도구를 아직 불러오지 못했어요. 잠시 후 다시 시도해주세요.'); return; }
+      if (!load().length){ alert('먼저 기록을 하나 이상 추가해주세요!'); return; }
+      var label = capBtn.textContent;
+      capBtn.disabled = true; capBtn.textContent = '이미지 만드는 중…';
+      document.body.classList.add('capturing');
+      /* 레이아웃이 반영된 뒤 캡처 */
+      requestAnimationFrame(function(){ setTimeout(function(){
+        var target = document.querySelector('.wrap');
+        var bg = (getComputedStyle(document.body).backgroundColor) || '#F7F3EA';
+        html2canvas(target, { backgroundColor:bg, scale:Math.min(2, window.devicePixelRatio||2), useCORS:true, logging:false })
+          .then(function(canvas){ saveCanvas(canvas); })
+          .catch(function(){ alert('캡처에 실패했어요. 다시 시도해주세요.'); })
+          .then(function(){
+            document.body.classList.remove('capturing');
+            capBtn.disabled = false; capBtn.textContent = label;
+          });
+      }, 40); });
+    });
+  }
 
   /* reveal */
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
