@@ -47,7 +47,7 @@
   .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--body);font-size:14px;font-weight:800;border-radius:12px;padding:13px;cursor:pointer;border:0}
   .btn.add{color:#fff;background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);box-shadow:0 10px 24px rgba(110,48,199,.24)}
   .btn.print{color:var(--ink);background:var(--accent-soft);border:2px solid var(--accent)}
-  .btn.suggest{width:100%;margin-top:10px;background:#fff;border:2px solid #E4D3F0;color:var(--ink)}
+  .btn.suggest{background:#fff;border:2px solid #E4D3F0;color:var(--ink);font-size:13px}
   .btn:active{transform:scale(.99)}
   .btn input{display:none}
   .hint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5}
@@ -71,6 +71,21 @@
   .pctrl button:active{transform:scale(.9)}
   .pmove{position:absolute;bottom:44px;left:-9px;display:flex;flex-direction:column;gap:4px}
   .pmove button{width:26px;height:26px;border:0;border-radius:50%;background:#fff;color:var(--ink);font-size:13px;font-weight:800;line-height:26px;cursor:pointer;box-shadow:0 3px 8px rgba(35,49,77,.22);padding:0}
+
+  .pnum{position:absolute;top:-9px;left:-6px;background:var(--ink);color:#fff;font-family:var(--display);font-size:11px;padding:2px 8px;border-radius:8px;z-index:1}
+
+  /* paste-captions modal */
+  .modal{position:fixed;inset:0;background:rgba(35,49,77,.5);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+  .modal[hidden]{display:none}
+  .modal-card{background:#fff;border-radius:18px;padding:18px;width:100%;max-width:460px;box-shadow:0 24px 60px rgba(35,49,77,.35);max-height:88vh;overflow:auto}
+  .modal-h{font-family:var(--display);font-size:19px;color:var(--ink)}
+  .modal-p{font-size:12.5px;color:#5f6b57;line-height:1.55;margin:8px 0 12px}
+  .modal-p b{color:var(--ink);font-weight:800}
+  .modal-ta{width:100%;min-height:150px;font-family:var(--body);font-size:14px;line-height:1.6;color:var(--ink);background:#FBF8F1;border:1px solid var(--line);border-radius:12px;padding:12px;resize:vertical}
+  .modal-ta:focus{outline:none;border-color:var(--accent);background:#fff}
+  .modal-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .modal-btns .btn{flex:1;min-width:120px;font-size:13.5px;padding:12px}
+  .btn.ghost{background:var(--gold-bg);border:1px solid var(--gold-bd);color:var(--gold-tx)}
 
   .empty{grid-column:1 / -1;text-align:center;color:var(--muted);font-size:14px;font-weight:600;padding:40px 12px;background:#fff;border:1px dashed var(--line);border-radius:16px}
   .empty .big{font-family:var(--hand);font-size:26px;color:var(--ink);display:block;margin-bottom:4px}
@@ -128,11 +143,28 @@
     <label class="btn add">＋ 사진 추가<input type="file" accept="image/*" multiple id="a-file"></label>
     <button class="btn print" type="button" id="a-print">🖨 인쇄 · PDF 저장</button>
   </div>
-  <button class="btn suggest no-print" type="button" id="a-suggest">✨ 빈 캡션 자동 채우기</button>
-  <div class="hint no-print">여러 장 한 번에 고를 수 있어요 · 사진/제목/캡션을 탭해서 편집 · 캡션 옆 <b>✨</b>로 한 장씩 추천도 돼요 · 인쇄 창에서 <b>‘배경 그래픽’</b>을 켜면 색이 예쁘게 나와요</div>
+  <div class="toolbar no-print" style="margin-top:10px">
+    <button class="btn suggest" type="button" id="a-suggest">✨ 빈 캡션 자동</button>
+    <button class="btn suggest" type="button" id="a-paste">📝 캡션 붙여넣기</button>
+  </div>
+  <div class="hint no-print">사진마다 <b>#번호</b>가 붙어요 · 클로드에 사진을 올려 캡션을 받아 <b>📝 붙여넣기</b>로 한 번에 입력 · 인쇄 창에서 <b>‘배경 그래픽’</b>을 켜면 색이 예쁘게 나와요</div>
 
   <!-- ALBUM (A4 쪽 단위) -->
   <div id="a-album"></div>
+
+  <!-- PASTE CAPTIONS MODAL -->
+  <div class="modal no-print" id="a-modal" hidden>
+    <div class="modal-card">
+      <div class="modal-h">📝 캡션 붙여넣기</div>
+      <p class="modal-p">사진 <b>#번호 순서대로</b> 한 줄에 하나씩 붙여넣으세요. <b>“1. ”, “#1”</b> 같은 번호는 자동으로 정리돼요. (현재 사진 <b><span id="a-modal-n">0</span>장</b>)</p>
+      <textarea class="modal-ta" id="a-paste-txt" spellcheck="false" placeholder="1. 신나게 웃는 우리 딸&#10;2. 퍼레이드 앞자리 사수!&#10;3. 달콤한 아이스크림 타임"></textarea>
+      <div class="modal-btns">
+        <button class="btn ghost" type="button" id="a-copy-prompt">🤖 클로드용 프롬프트 복사</button>
+        <button class="btn print" type="button" id="a-paste-cancel">취소</button>
+        <button class="btn add" type="button" id="a-paste-apply">적용</button>
+      </div>
+    </div>
+  </div>
 
   <div class="note no-print">
     <div class="nk">저장 안내</div>
@@ -247,11 +279,12 @@
     return pages;
   }
 
-  function buildPolaroid(p){
+  function buildPolaroid(p, idx){
     var fig = document.createElement('figure');
     fig.className = 'polaroid';
     fig.style.setProperty('--t', p.t || '0deg');
     fig.innerHTML =
+      '<div class="pnum no-print">#'+(idx+1)+'</div>' +
       '<div class="pimg" style="background-image:url('+p.src+')"></div>' +
       '<div class="pcap" contenteditable="true" spellcheck="false" data-id="'+p.id+'">'+esc(p.cap||'')+'</div>' +
       '<div class="pmove no-print"><button type="button" data-mv="up" title="앞으로">‹</button><button type="button" data-mv="down" title="뒤로">›</button></div>' +
@@ -280,13 +313,14 @@
       albumEl.appendChild(e); return;
     }
     var pages = paginate();
+    var gi = 0;
     pages.forEach(function(pagePhotos, pi){
       var sheet = document.createElement('div'); sheet.className = 'sheet';
       var tag = document.createElement('div'); tag.className = 'ptag no-print';
       tag.textContent = (pi+1) + ' / ' + pages.length + ' 쪽';
       sheet.appendChild(tag);
       var grid = document.createElement('div'); grid.className = 'album';
-      pagePhotos.forEach(function(p){ grid.appendChild(buildPolaroid(p)); });
+      pagePhotos.forEach(function(p){ grid.appendChild(buildPolaroid(p, gi++)); });
       sheet.appendChild(grid);
       albumEl.appendChild(sheet);
     });
@@ -301,6 +335,53 @@
       if(!empties.length){ alert('빈 캡션이 없어요 🙂 (직접 쓴 캡션은 그대로 둬요)'); return; }
       empties.forEach(function(p){ p.cap = nextCap(); });
       save(); render();
+    });
+  }
+
+  /* ---------- 캡션 일괄 붙여넣기 (클로드가 써준 캡션을 한 번에) ---------- */
+  var modal    = document.getElementById('a-modal');
+  var pasteBtn = document.getElementById('a-paste');
+  var pasteTxt = document.getElementById('a-paste-txt');
+  var modalN   = document.getElementById('a-modal-n');
+  var applyBtn = document.getElementById('a-paste-apply');
+  var cancelBtn= document.getElementById('a-paste-cancel');
+  var promptBtn= document.getElementById('a-copy-prompt');
+  var PROMPT = '이 사진들에 각각 어울리는 짧고 따뜻한 한국어 캡션을 사진 순서대로 한 줄에 하나씩, 앞에 번호를 붙여서 써줘. 롯데월드 가족 나들이 사진첩(집에 인쇄해 둘 용도)에 넣을 거야. 각 캡션은 15자 내외, 이모지는 있으면 하나만.';
+
+  function openModal(){
+    if(!state.photos.length){ alert('사진을 먼저 담아주세요!'); return; }
+    modalN.textContent = state.photos.length;
+    pasteTxt.value = '';
+    modal.hidden = false;
+    pasteTxt.focus();
+  }
+  function closeModal(){ modal.hidden = true; }
+
+  /* '1.' '#2)' '- ' 같은 앞 번호/불릿을 정리 */
+  function cleanLine(s){ return s.replace(/^\s*(?:#?\d+\s*[.)\-:]|[-*•])\s*/, '').trim(); }
+
+  function applyPaste(){
+    var lines = pasteTxt.value.split(/\r?\n/).map(cleanLine).filter(function(s){ return s.length; });
+    if(!lines.length){ alert('붙여넣은 캡션이 없어요.'); return; }
+    var n = Math.min(lines.length, state.photos.length);
+    for (var i=0;i<n;i++){ state.photos[i].cap = lines[i]; }
+    if(!save()) return;
+    closeModal(); render();
+    var extra = lines.length > state.photos.length ? ' (사진보다 많은 ' + (lines.length - state.photos.length) + '줄은 건너뜀)' :
+                (lines.length < state.photos.length ? ' (뒤쪽 사진 ' + (state.photos.length - lines.length) + '장은 비어있어요)' : '');
+    alert(n + '개 캡션을 넣었어요!' + extra);
+  }
+
+  if (pasteBtn){ pasteBtn.addEventListener('click', openModal); }
+  if (cancelBtn){ cancelBtn.addEventListener('click', closeModal); }
+  if (applyBtn){ applyBtn.addEventListener('click', applyPaste); }
+  if (modal){ modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); }); }
+  if (promptBtn){
+    promptBtn.addEventListener('click', function(){
+      function done(){ var t=promptBtn.textContent; promptBtn.textContent='복사됨! 클로드에 사진과 함께 붙여넣기'; setTimeout(function(){ promptBtn.textContent=t; }, 2200); }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(PROMPT).then(done, function(){ window.prompt('아래 프롬프트를 복사하세요:', PROMPT); });
+      } else { window.prompt('아래 프롬프트를 복사하세요:', PROMPT); }
     });
   }
 
