@@ -47,15 +47,21 @@
   .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--body);font-size:14px;font-weight:800;border-radius:12px;padding:13px;cursor:pointer;border:0}
   .btn.add{color:#fff;background:linear-gradient(158deg,#F15A9C 0%,#A93DD6 52%,#6E30C7 100%);box-shadow:0 10px 24px rgba(110,48,199,.24)}
   .btn.print{color:var(--ink);background:var(--accent-soft);border:2px solid var(--accent)}
+  .btn.suggest{width:100%;margin-top:10px;background:#fff;border:2px solid #E4D3F0;color:var(--ink)}
   .btn:active{transform:scale(.99)}
   .btn input{display:none}
   .hint{font-size:11.5px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5}
   .hint b{color:var(--ink);font-weight:800}
 
-  /* album grid of polaroids */
-  .album{margin-top:20px;display:grid;grid-template-columns:repeat(2,1fr);gap:20px 16px}
+  /* pages (sheets) — A4 한 장 = 한 쪽 */
+  #a-album{margin-top:18px}
+  .sheet{background:#FFFDF8;border:1px solid var(--line);border-radius:14px;padding:20px 14px 16px;box-shadow:var(--shadow);margin-top:18px;position:relative}
+  .sheet:first-child{margin-top:0}
+  .sheet .ptag{position:absolute;top:-10px;left:14px;background:var(--accent);color:#fff;font-family:var(--display);font-size:11px;letter-spacing:.02em;padding:2px 10px;border-radius:8px}
+  /* album grid of polaroids (inside a sheet) */
+  .album{display:grid;grid-template-columns:repeat(2,1fr);gap:20px 14px}
   .polaroid{background:#fff;padding:9px 9px 0;border-radius:3px;box-shadow:0 9px 22px rgba(35,49,77,.16);transform:rotate(var(--t,0deg));position:relative;break-inside:avoid;page-break-inside:avoid}
-  .polaroid .pimg{width:100%;aspect-ratio:1/1;background:#F1EADD center/cover no-repeat;border-radius:2px}
+  .polaroid .pimg{width:100%;aspect-ratio:4/3;background:#fff center/contain no-repeat;border-radius:2px}
   .polaroid .pcap{font-family:var(--hand);font-size:20px;line-height:1.2;color:#4a4436;text-align:center;padding:9px 4px 13px;min-height:42px;outline:none;word-break:break-word}
   .polaroid .pcap:empty:before{content:'여기 캡션 ✎';color:#CDC4B2}
   .polaroid .pcap:focus{background:#FFFBF2;border-radius:4px}
@@ -79,7 +85,7 @@
     .polaroid:hover{transform:rotate(0deg) scale(1.02);box-shadow:0 16px 30px rgba(35,49,77,.2);z-index:2}
   }
 
-  /* ---------- PRINT (A4) ---------- */
+  /* ---------- PRINT (A4) · 쪽 단위로 끊기 ---------- */
   @media print{
     @page{ size:A4; margin:12mm; }
     html,body{ background:#F7F3EA !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -87,10 +93,14 @@
     .wrap{ max-width:none; margin:0; padding:0; }
     .titlebar{ padding-top:0; margin-bottom:6mm; }
     .talbum{ font-size:40px; }
-    .album{ margin-top:6mm; gap:9mm 8mm; }
-    .polaroid{ box-shadow:0 2px 4px rgba(0,0,0,.12); }
+    /* 한 쪽(sheet) = A4 한 장, 쪽마다 페이지 나눔 */
+    #a-album{ margin-top:6mm; }
+    .sheet{ background:none; border:0; box-shadow:none; border-radius:0; padding:0; margin:0; break-after:page; page-break-after:always; break-inside:avoid; page-break-inside:avoid; }
+    .sheet:last-child{ break-after:auto; page-break-after:auto; }
+    .album{ gap:9mm 8mm; }
+    .polaroid{ box-shadow:0 2px 4px rgba(0,0,0,.12); break-inside:avoid; page-break-inside:avoid; }
     .polaroid:hover{ transform:rotate(var(--t,0deg)); }
-    .pctrl,.pmove{ display:none !important; }
+    .pctrl,.pmove,.ptag{ display:none !important; }
     [contenteditable]:focus{ background:none; box-shadow:none; }
     .polaroid .pcap:empty:before{ content:''; }
   }
@@ -118,10 +128,11 @@
     <label class="btn add">＋ 사진 추가<input type="file" accept="image/*" multiple id="a-file"></label>
     <button class="btn print" type="button" id="a-print">🖨 인쇄 · PDF 저장</button>
   </div>
-  <div class="hint no-print">여러 장 한 번에 고를 수 있어요 · 사진/제목/캡션을 탭해서 편집 · 인쇄 창에서 <b>‘배경 그래픽’</b>을 켜면 색이 예쁘게 나와요</div>
+  <button class="btn suggest no-print" type="button" id="a-suggest">✨ 빈 캡션 자동 채우기</button>
+  <div class="hint no-print">여러 장 한 번에 고를 수 있어요 · 사진/제목/캡션을 탭해서 편집 · 캡션 옆 <b>✨</b>로 한 장씩 추천도 돼요 · 인쇄 창에서 <b>‘배경 그래픽’</b>을 켜면 색이 예쁘게 나와요</div>
 
-  <!-- ALBUM -->
-  <div class="album" id="a-album"></div>
+  <!-- ALBUM (A4 쪽 단위) -->
+  <div id="a-album"></div>
 
   <div class="note no-print">
     <div class="nk">저장 안내</div>
@@ -187,11 +198,18 @@
   fileEl.addEventListener('change', function(){
     var files = Array.prototype.slice.call(fileEl.files || []);
     if(!files.length) return;
+    /* 비동기 디코드가 끝나는 순서와 무관하게, 고른 순서를 그대로 유지 */
+    var results = new Array(files.length);
     var pending = files.length;
-    files.forEach(function(f){
+    files.forEach(function(f, idx){
       shrink(f, function(dataUrl){
-        if (dataUrl){ state.photos.push({ id:nid(), src:dataUrl, cap:'', t:tilt() }); }
-        if (--pending === 0){ save(); render(); }
+        results[idx] = dataUrl;
+        if (--pending === 0){
+          results.forEach(function(du){
+            if (du){ state.photos.push({ id:nid(), src:du, cap:'', t:tilt() }); }
+          });
+          save(); render();
+        }
       });
     });
     fileEl.value = '';
@@ -210,6 +228,50 @@
     save(); render();
   }
 
+  /* ---------- 캡션 추천(귀찮은 캡션 도우미) ---------- */
+  var CAPS = ['신나는 순간 🎢','인생샷 건짐 📸','우리 딸 최고!','여기 너무 예뻐 ✨','까르르 웃음 😆',
+    '퍼레이드 구경 중','달콤 간식 타임 🍦','또 타고 싶어!','가족 다 모여 ❤️','오늘의 하이라이트',
+    '무서웠지만 재밌어','꿈만 같은 하루','엄마 아빠랑 함께','반짝반짝 추억','최고의 하루 🎠',
+    '두근두근 출발!','하늘 위에서 🎈','활짝 웃는 얼굴','잊지 못할 하루','우리만의 순간'];
+  var capPick = 0;
+  function nextCap(){ var c = CAPS[capPick % CAPS.length]; capPick++; return c; }
+
+  /* ---------- 페이지(쪽) 구성: A4 한 장 = 한 쪽 ---------- */
+  var FIRST_PER = 4;   /* 제목이 있는 1쪽 */
+  var REST_PER  = 6;   /* 2쪽부터 */
+  function paginate(){
+    var arr = state.photos, pages = [];
+    if(!arr.length) return pages;
+    pages.push(arr.slice(0, FIRST_PER));
+    for (var i = FIRST_PER; i < arr.length; i += REST_PER){ pages.push(arr.slice(i, i + REST_PER)); }
+    return pages;
+  }
+
+  function buildPolaroid(p){
+    var fig = document.createElement('figure');
+    fig.className = 'polaroid';
+    fig.style.setProperty('--t', p.t || '0deg');
+    fig.innerHTML =
+      '<div class="pimg" style="background-image:url('+p.src+')"></div>' +
+      '<div class="pcap" contenteditable="true" spellcheck="false" data-id="'+p.id+'">'+esc(p.cap||'')+'</div>' +
+      '<div class="pmove no-print"><button type="button" data-mv="up" title="앞으로">‹</button><button type="button" data-mv="down" title="뒤로">›</button></div>' +
+      '<div class="pctrl no-print"><button type="button" class="sug" title="캡션 추천">✨</button><button type="button" class="del" title="빼기">×</button></div>';
+    var cap = fig.querySelector('.pcap');
+    cap.addEventListener('input', function(){
+      var it = state.photos.find(function(x){ return String(x.id)===String(p.id); });
+      if (it){ it.cap = cap.textContent; save(); }
+    });
+    fig.querySelector('.del').addEventListener('click', function(){ del(p.id); });
+    fig.querySelector('[data-mv="up"]').addEventListener('click', function(){ move(p.id,-1); });
+    fig.querySelector('[data-mv="down"]').addEventListener('click', function(){ move(p.id, 1); });
+    fig.querySelector('.sug').addEventListener('click', function(){
+      var it = state.photos.find(function(x){ return String(x.id)===String(p.id); });
+      if(!it) return;
+      it.cap = nextCap(); cap.textContent = it.cap; save();
+    });
+    return fig;
+  }
+
   function render(){
     albumEl.innerHTML = '';
     if(!state.photos.length){
@@ -217,28 +279,30 @@
       e.innerHTML = '<span class="big">아직 사진이 없어요</span>위 <b>＋ 사진 추가</b>로 우리 가족 사진을 담아보세요 ✨';
       albumEl.appendChild(e); return;
     }
-    state.photos.forEach(function(p){
-      var fig = document.createElement('figure');
-      fig.className = 'polaroid';
-      fig.style.setProperty('--t', p.t || '0deg');
-      fig.innerHTML =
-        '<div class="pimg" style="background-image:url('+p.src+')"></div>' +
-        '<div class="pcap" contenteditable="true" spellcheck="false" data-id="'+p.id+'">'+esc(p.cap||'')+'</div>' +
-        '<div class="pmove no-print"><button type="button" data-mv="up" title="앞으로">‹</button><button type="button" data-mv="down" title="뒤로">›</button></div>' +
-        '<div class="pctrl no-print"><button type="button" class="del" title="빼기">×</button></div>';
-      var cap = fig.querySelector('.pcap');
-      cap.addEventListener('input', function(){
-        var t = cap.textContent;
-        var it = state.photos.find(function(x){ return String(x.id)===String(p.id); });
-        if (it){ it.cap = t; save(); }
-      });
-      fig.querySelector('.del').addEventListener('click', function(){ del(p.id); });
-      fig.querySelector('[data-mv="up"]').addEventListener('click', function(){ move(p.id,-1); });
-      fig.querySelector('[data-mv="down"]').addEventListener('click', function(){ move(p.id, 1); });
-      albumEl.appendChild(fig);
+    var pages = paginate();
+    pages.forEach(function(pagePhotos, pi){
+      var sheet = document.createElement('div'); sheet.className = 'sheet';
+      var tag = document.createElement('div'); tag.className = 'ptag no-print';
+      tag.textContent = (pi+1) + ' / ' + pages.length + ' 쪽';
+      sheet.appendChild(tag);
+      var grid = document.createElement('div'); grid.className = 'album';
+      pagePhotos.forEach(function(p){ grid.appendChild(buildPolaroid(p)); });
+      sheet.appendChild(grid);
+      albumEl.appendChild(sheet);
     });
   }
   render();
+
+  /* 빈 캡션 한 번에 채우기 (직접 쓴 캡션은 유지) */
+  var sugBtn = document.getElementById('a-suggest');
+  if (sugBtn){
+    sugBtn.addEventListener('click', function(){
+      var empties = state.photos.filter(function(p){ return !(p.cap && String(p.cap).trim()); });
+      if(!empties.length){ alert('빈 캡션이 없어요 🙂 (직접 쓴 캡션은 그대로 둬요)'); return; }
+      empties.forEach(function(p){ p.cap = nextCap(); });
+      save(); render();
+    });
+  }
 
   printBtn.addEventListener('click', function(){
     if(!state.photos.length){ alert('사진을 먼저 담아주세요!'); return; }
